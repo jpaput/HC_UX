@@ -29,6 +29,12 @@
             android:text="Hello World!"
             android:layout_centerInParent="true"/>
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/drivers_listview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/drivers_appbarlayout"/>
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/drivers_fab"
             android:layout_width="wrap_content"

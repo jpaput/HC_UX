@@ -10,11 +10,18 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
+import javax.net.ssl.HostnameVerifier
 
 class NetworkManager {
 
+    class DO_NOT_VERIFY_IMP: javax.net.ssl.HostnameVerifier {
+        override fun verify(p0: String?, p1: javax.net.ssl.SSLSession?): Boolean {
+            return true
+        }
+    }
+
     companion object {
-        const val BASE_URL = "http://hiring.heetch.com/mobile/"
+        const val BASE_URL = "https://hiring.heetch.com/mobile/"
     }
 
     fun getRepository() : ApiInterface {
@@ -39,11 +46,16 @@ class NetworkManager {
 
 
     private fun provideLoggingCapableHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
+
+        val DO_NOT_VERIFY = DO_NOT_VERIFY_IMP()
+
+
         return OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
             .addInterceptor(loggingInterceptor)
+            .hostnameVerifier(DO_NOT_VERIFY)
             .build()
     }
 
