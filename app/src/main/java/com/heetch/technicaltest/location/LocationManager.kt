@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
+import com.heetch.technicaltest.data.remote.DriverRemoteModel
 import com.heetch.technicaltest.util.RxPicasso
 import io.reactivex.Observable
 
@@ -45,6 +46,14 @@ class LocationManager(private val context: Context) : MapSnapshotRetriever, Addr
 
     fun getDistance(from: Location, to: Location) : Float {
         return from.distanceTo(to)
+    }
+
+    fun getDistance(from: Location, to : DriverRemoteModel.Coordinates) : Float {
+        var targetLocation =  Location("");//provider name is unnecessary
+        targetLocation.setLatitude(to.latitude);//your coords of course
+        targetLocation.setLongitude(to.longitude)
+
+        return getDistance(from, targetLocation);
     }
 
 }

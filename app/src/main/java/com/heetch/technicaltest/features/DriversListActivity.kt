@@ -9,6 +9,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.heetch.technicaltest.R
+import com.heetch.technicaltest.data.local.DriverModel
+import com.heetch.technicaltest.data.remote.DriverRemoteModel
 import com.heetch.technicaltest.features.adapter.DriverAdapter
 import com.heetch.technicaltest.location.LocationManager
 import com.heetch.technicaltest.service.DriverService
@@ -95,6 +97,7 @@ class DriversListActivity : AppCompatActivity() {
             .interval(0, 5000, java.util.concurrent.TimeUnit.MILLISECONDS)
             .timeInterval()
             .flatMap { driverService.refreshDriver(location) }
+            .flatMap { transformList(it, location) }
             .subscribe (
                 { data ->
                     driverAdapter.updateData(data)
@@ -108,6 +111,21 @@ class DriversListActivity : AppCompatActivity() {
         Log.d(LOG_TAG, "GetDriverDisposable is now running")
 
         compositeDisposable.add(getDriverDisposable)
+    }
+
+    private fun transformList(it: List<DriverRemoteModel> , location: Location) : Observable<List<DriverModel>> {
+        return Observable.just(
+            it.map {
+                DriverModel(
+                    it.id,
+                    it.getFullName(),
+                    it.image,
+                    locationManager.getDistance(location, it.coordinates)
+                )
+
+            }
+            .toList().sorted()
+        )
     }
 
     override fun onDestroy() {
