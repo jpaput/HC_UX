@@ -120,6 +120,7 @@ class DriversListActivity : AppCompatActivity() {
                     it.id,
                     it.getFullName(),
                     it.image,
+                    it.coordinates,
                     locationManager.getDistance(location, it.coordinates)
                 )
 

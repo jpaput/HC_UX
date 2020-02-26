@@ -12,10 +12,9 @@ import io.reactivex.Observable
 class LocationManager(private val context: Context) : MapSnapshotRetriever, AddressRetriever {
 
     companion object {
-        const val API_KEY = "AIzaSyDIJ9XX2ZvRKCJcFRrl-lRanEtFUow4piM"
+        const val API_KEY = "AIzaSyDWuvW9vCoiuJ_MEgaXnBrAJ67pbiyjtdA"
         const val DEFAULT_ZOOM = 18
-        const val ICON_URL =
-            "https%3A%2F%2Fs3-eu-west-1.amazonaws.com%2Fheetch-production%2Fassets%2Fproducts%2Fcar-image-lepro.png"
+        const val ICON_URL = "https%3A%2F%2Fs3-eu-west-1.amazonaws.com%2Fheetch-production%2Fassets%2Fproducts%2Fcar-image-lepro.png"
     }
 
     override fun retrieveSnapshot(latitude: Double, longitude: Double): Observable<Bitmap> {
@@ -27,7 +26,7 @@ class LocationManager(private val context: Context) : MapSnapshotRetriever, Addr
         return "https://maps.googleapis.com/maps/api/staticmap?" +
                 "center=$latitude,$longitude" +
                 "&zoom=$DEFAULT_ZOOM" +
-                "&size=600x400" +
+                "&size=800x400" +
                 "&markers=anchor:center%7Cicon:$ICON_URL%7C$latitude,$longitude" +
                 "&key=$API_KEY"
     }

@@ -8,7 +8,7 @@ data class DriverRemoteModel(val id: Int,
 )  {
 
     public fun getFullName() : String {
-        return firstname + " " + lastname.toUpperCase()
+        return firstname + " " + lastname.get(0).toUpperCase() + "."
     }
 
     data class Coordinates(val latitude: Double,
