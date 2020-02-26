@@ -11,38 +11,30 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.heetch.technicaltest.R
 import com.heetch.technicaltest.features.adapter.DriverAdapter
 import com.heetch.technicaltest.location.LocationManager
-import com.heetch.technicaltest.network.CoordinatesBody
-import com.heetch.technicaltest.network.DriverRemoteModel
-import com.heetch.technicaltest.network.NetworkManager
 import com.heetch.technicaltest.service.DriverService
 import com.jakewharton.rxbinding3.view.clicks
 import com.tbruyelle.rxpermissions2.RxPermissions
 import io.reactivex.Observable
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_drivers.*
 import pl.charmas.android.reactivelocation2.ReactiveLocationProvider
-import java.util.concurrent.TimeUnit
+import java.io.Console
 
 class DriversListActivity : AppCompatActivity() {
 
-    //TODO to delete
-
     val driverService = DriverService()
-
     lateinit var driverAdapter : DriverAdapter
-
     companion object {
         const val LOG_TAG = "DriversListActivity"
     }
-
     private val permissions =
         arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
     private val compositeDisposable = CompositeDisposable()
     private lateinit var locationManager: LocationManager
+    private lateinit var getDriverDisposable : Disposable
+    private var isGetDriverRunning: Boolean = false
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,24 +52,47 @@ class DriversListActivity : AppCompatActivity() {
 
     private fun subscribeToFabClick(): Disposable {
 
-
         return drivers_fab.clicks()
-            .doOnNext { Toast.makeText(this, "Play!", Toast.LENGTH_SHORT).show() }
             .flatMap {
-                checkPermissions()
-                    .flatMap { getUserLocation() }
-                    .doOnNext {
-                        Log.e(LOG_TAG, "Location : $it")
-                        getDrivers(it)
+                checkRunState()
+                .flatMap {
+                    if(it){
+                        checkPermissions()
+                            .flatMap {
+                                getUserLocation() }
+                            .doOnNext { runGetDrivers(it) }
+                    }else{
+                        Observable.just(true)
                     }
+                }
             }
             .subscribe()
     }
 
-    private fun getDrivers(location : Location){
+    private fun checkRunState() : Observable<Boolean>{
 
-        Observable
-            .interval(5000, java.util.concurrent.TimeUnit.MILLISECONDS)
+        Log.d(LOG_TAG, "check run state : " + isGetDriverRunning)
+
+        if(isGetDriverRunning){
+            Log.d(LOG_TAG, "Removing GetDriverDisposable")
+
+            compositeDisposable.remove(getDriverDisposable)
+            drivers_fab.setImageDrawable(
+                baseContext.resources.getDrawable(R.drawable.ic_play_arrow_black_24dp))
+        }else{
+            drivers_fab.setImageDrawable(
+                baseContext.resources.getDrawable(R.drawable.ic_pause_black_24dp))
+        }
+
+        isGetDriverRunning = !isGetDriverRunning
+
+        return Observable.just(isGetDriverRunning)
+    }
+
+    private fun runGetDrivers(location : Location){
+
+        getDriverDisposable = Observable
+            .interval(0, 5000, java.util.concurrent.TimeUnit.MILLISECONDS)
             .timeInterval()
             .flatMap { driverService.refreshDriver(location) }
             .subscribe (
@@ -87,6 +102,12 @@ class DriversListActivity : AppCompatActivity() {
                 },
                 { error -> println("Error: $error") }
             )
+
+        isGetDriverRunning = true
+
+        Log.d(LOG_TAG, "GetDriverDisposable is now running")
+
+        compositeDisposable.add(getDriverDisposable)
     }
 
     override fun onDestroy() {

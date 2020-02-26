@@ -22,13 +22,6 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <TextView
-            android:id="@+id/drivers_message"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Hello World!"
-            android:layout_centerInParent="true"/>
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/drivers_listview"
         android:layout_width="match_parent"
