@@ -67,23 +67,22 @@ class DriverAdapter(val context: Context)
             }
         }
 
-        driversData.forEach {
-            val newData = freshData.find { driver -> driver.id == it.id }
+        freshData.forEach {
+            val oldData = driversData.find { driver -> driver.id == it.id }
 
-            val position = driversData.indexOf(it)
-            val newPosition = freshData.indexOf(newData)
+            val oldposition = driversData.indexOf(oldData)
+            val newPosition = freshData.indexOf(it)
 
-            if(position  != newPosition){
+            if(oldposition  != newPosition){
                 //Change position and notify it
-                driversData.removeAt(position)
-                newData?.let { it1 -> driversData.add(position, it1) }
+                driversData.removeAt(oldposition)
+                driversData.add(newPosition, it)
 
-                notifyItemMoved(position, newPosition)
-
+                notifyItemMoved(oldposition, newPosition)
             }else{
                 //Update distance and notify
-                it.distance = newData?.distance ?: 0f
-                notifyItemChanged(position)
+                driversData.get(newPosition).distance = it.distance
+                notifyItemChanged(oldposition)
             }
         }
 
