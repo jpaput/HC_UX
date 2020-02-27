@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">Heetch Tech Test</string>
     <string name="action_settings">Settings</string>
     <string name="driver_away_from_you">%1$f away from you</string>
 

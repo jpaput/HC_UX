@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">@color/rose</color>
-    <color name="colorPrimaryDark">@color/ruby</color>
+
     <color name="colorAccent">@color/tolopea</color>
 
     <color name="rose">#F80059</color>
@@ -10,5 +9,7 @@
 
     <color name="gold">#FFD700</color>
     <color name="gold_dark">#C2A300</color>
+
+    <color name="white">#ffffff</color>
 
 </resources>

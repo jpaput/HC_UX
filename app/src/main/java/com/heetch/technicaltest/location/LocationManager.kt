@@ -31,6 +31,10 @@ class LocationManager(private val context: Context) : MapSnapshotRetriever, Addr
                 "&key=$API_KEY"
     }
 
+    fun generateSnapshotUrl(coordinates: DriverRemoteModel.Coordinates): String {
+        return generateSnapshotUrl(coordinates.latitude, coordinates.longitude)
+    }
+
     override fun geocode(latitude: Double, longitude: Double): Observable<Address> {
         return Observable.fromCallable {
             Geocoder(context).getFromLocation(latitude, longitude, 1)
@@ -52,7 +56,8 @@ class LocationManager(private val context: Context) : MapSnapshotRetriever, Addr
         targetLocation.setLatitude(to.latitude);//your coords of course
         targetLocation.setLongitude(to.longitude)
 
-        return getDistance(from, targetLocation);
+        return getDistance(from, targetLocation)
+
     }
 
 }

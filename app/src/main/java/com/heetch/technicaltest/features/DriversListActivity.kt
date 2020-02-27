@@ -5,7 +5,7 @@ import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.heetch.technicaltest.R
@@ -21,7 +21,6 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_drivers.*
 import pl.charmas.android.reactivelocation2.ReactiveLocationProvider
-import java.io.Console
 
 class DriversListActivity : AppCompatActivity() {
 
@@ -41,7 +40,6 @@ class DriversListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_drivers)
-        setSupportActionBar(drivers_toolbar)
 
         driverAdapter = DriverAdapter(this)
 
@@ -97,7 +95,7 @@ class DriversListActivity : AppCompatActivity() {
             .interval(0, 5000, java.util.concurrent.TimeUnit.MILLISECONDS)
             .timeInterval()
             .flatMap { driverService.refreshDriver(location) }
-            .flatMap { transformList(it, location) }
+            .flatMap { digestData(it, location) }
             .subscribe (
                 { data ->
                     driverAdapter.updateData(data)
@@ -113,7 +111,7 @@ class DriversListActivity : AppCompatActivity() {
         compositeDisposable.add(getDriverDisposable)
     }
 
-    private fun transformList(it: List<DriverRemoteModel> , location: Location) : Observable<List<DriverModel>> {
+    private fun digestData(it: List<DriverRemoteModel>, location: Location) : Observable<List<DriverModel>> {
         return Observable.just(
             it.map {
                 DriverModel(
@@ -121,9 +119,9 @@ class DriversListActivity : AppCompatActivity() {
                     it.getFullName(),
                     it.image,
                     it.coordinates,
-                    locationManager.getDistance(location, it.coordinates)
+                    locationManager.getDistance(location, it.coordinates),
+                    locationManager.generateSnapshotUrl(it.coordinates)
                 )
-
             }
             .toList().sorted()
         )
