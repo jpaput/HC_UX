@@ -53,7 +53,7 @@ class DriversListActivity : AppCompatActivity() {
     private fun subscribeToFabClick(): Disposable {
 
         return drivers_fab.clicks()
-            .flatMap {
+            .doOnNext() {
                 checkRunState()
                 .flatMap {
                     if(it){

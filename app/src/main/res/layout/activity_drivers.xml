@@ -20,9 +20,10 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentBottom="true"
             android:layout_margin="16dp"
-            android:tint="@color/colorPrimaryDark"
+            app:backgroundTint="@color/colorPrimary"
+            app:borderWidth="0dp"
+            android:tint="@color/textcolor"
             android:background="@color/colorPrimaryDark"
-            android:backgroundTint="@color/colorPrimary"
             app:srcCompat="@drawable/ic_play_arrow_black_24dp"/>
 
 </RelativeLayout>
