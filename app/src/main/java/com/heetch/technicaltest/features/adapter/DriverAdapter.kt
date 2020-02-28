@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.heetch.technicaltest.R
 import com.heetch.technicaltest.data.local.DriverModel
@@ -15,7 +16,10 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.driver_itemview.view.*
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 
+
+private val AVATAR_BASE_URL = "http://hiring.heetch.com/"
 
 class DriverAdapter(val context: Context)
     : RecyclerView.Adapter<DriverAdapter.ViewHolder>() {
@@ -23,7 +27,7 @@ class DriverAdapter(val context: Context)
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 
 
-    var driversData: MutableList<DriverModel> = arrayListOf();
+    var driversData: ArrayList<DriverModel> = arrayListOf();
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(context).inflate(R.layout.driver_itemview, parent, false))
@@ -41,7 +45,7 @@ class DriverAdapter(val context: Context)
 
         compositeDisposable.add(
             RxPicasso()
-            .loadImage("http://hiring.heetch.com/" + driver.image)
+            .loadAvatarImage(AVATAR_BASE_URL + driver.image)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .timeout(5, TimeUnit.SECONDS)
@@ -54,7 +58,6 @@ class DriverAdapter(val context: Context)
                 }
             )
         )
-
 
         compositeDisposable.add(
             RxPicasso()
@@ -77,43 +80,12 @@ class DriverAdapter(val context: Context)
         compositeDisposable.dispose()
     }
 
-    fun updateData(freshData : List<DriverModel>) {
+    fun set(freshData : List<DriverModel>) {
 
-        //Add if any item from fresh Data exist in list
-        freshData.forEach {
-            if (!driversData.any { driver -> driver.id == it.id }) {
-                driversData.add(it)
-                val position = driversData.indexOf(it)
-                notifyItemInserted(position)
-            }
-        }
-
-        //delete if item doesn't exist in fresh data anymore
-        driversData.forEach {
-            if (!freshData.any { driver -> driver.id == it.id }) {
-                val position = driversData.indexOf(it)
-                driversData.removeAt(position)
-                notifyItemRemoved(position)
-            }
-        }
-
-        freshData.forEach {
-            val oldData = driversData.find { driver -> driver.id == it.id }
-
-            val oldposition = driversData.indexOf(oldData)
-            val newPosition = freshData.indexOf(it)
-
-            if(oldposition != newPosition){
-                //Change position and notify it
-
-                Collections.swap(driversData, oldposition, newPosition);
-                notifyItemMoved(oldposition, newPosition)
-            }else{
-                //Update distance and notify
-                driversData.get(newPosition).distance = it.distance
-                notifyItemChanged(oldposition)
-            }
-        }
+        val diffResult = DiffUtil.calculateDiff(DriverDiffUtilCallBack(driversData, freshData))
+        driversData.clear()
+        driversData.addAll(freshData)
+        diffResult.dispatchUpdatesTo(this)
     }
 
 
@@ -122,5 +94,28 @@ class DriverAdapter(val context: Context)
         val driverPicture = itemView.driver_picture
         val mapViewImage = itemView.driver_map
         val driverDistanceTextview = itemView.distance_tv
+    }
+
+    class DriverDiffUtilCallBack(val oldList: ArrayList<DriverModel>?, val newList: List<DriverModel>?) : DiffUtil.Callback() {
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return newList?.get(newItemPosition)?.equals(oldList?.get(oldItemPosition))!!
+        }
+
+        override fun getOldListSize(): Int {
+            return oldList?.size ?: 0
+        }
+
+        override fun getNewListSize(): Int {
+            return newList?.size ?: 0
+        }
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return newList?.get(newItemPosition)?.equals(oldList?.get(oldItemPosition))!!
+        }
+
+        override fun getChangePayload(oldItemPosition: Int, newItemPosition: Int): Any? {
+            return super.getChangePayload(oldItemPosition, newItemPosition)
+        }
     }
 }

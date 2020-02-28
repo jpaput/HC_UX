@@ -21,6 +21,9 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_drivers.*
 import pl.charmas.android.reactivelocation2.ReactiveLocationProvider
 
+private val INTERVAL : Long = 5000
+private val NOW : Long = 0
+
 class DriversListActivity : AppCompatActivity() {
 
     companion object {
@@ -40,8 +43,9 @@ class DriversListActivity : AppCompatActivity() {
     lateinit var driverAdapter: DriverAdapter
 
     lateinit var getDriverSubscription: Disposable
+
     private val getDriverObservable = Observable
-        .interval(0, 5000, java.util.concurrent.TimeUnit.MILLISECONDS)
+        .interval(NOW, INTERVAL, java.util.concurrent.TimeUnit.MILLISECONDS)
         .timeInterval()
         .flatMap() {
             getUserLocation()
@@ -50,7 +54,7 @@ class DriversListActivity : AppCompatActivity() {
                         .subscribe(
                             { data ->
                                 Log.d(LOG_TAG, "Fresh data incoming !")
-                                driverAdapter.updateData(data)
+                                driverAdapter.set(data)
                                 driverAdapter.notifyDataSetChanged()
                             },
                             { error -> println("Error: $error") })
