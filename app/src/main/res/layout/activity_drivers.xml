@@ -1,29 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/colorPrimaryDark"
-        tools:context=".features.DriversListActivity">
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coordinator"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
+    tools:context=".features.DriversListActivity">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/drivers_listview"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/drivers_fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentBottom="true"
-            android:layout_margin="16dp"
-            app:backgroundTint="@color/colorPrimary"
-            app:borderWidth="0dp"
-            android:tint="@color/textcolor"
-            android:background="@color/colorPrimaryDark"
-            app:srcCompat="@drawable/ic_play_arrow_black_24dp"/>
+    <TextView
+        android:id="@+id/empty_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/large_margin"
+        android:textSize="@dimen/large_textsize"
+        android:gravity="center"
+        android:text="@string/empty_data"
+        android:textColor="@color/textcolor"/>
 
-</RelativeLayout>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/drivers_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:background="@color/colorPrimaryDark"
+        android:tint="@color/textcolor"
+        app:backgroundTint="@color/colorPrimary"
+        app:borderWidth="0dp"
+        app:srcCompat="@drawable/ic_play_arrow_black_24dp"
+        app:layout_anchor="@id/drivers_listview"
+        app:layout_anchorGravity="bottom|right|end"
+        />
+
+    <ProgressBar
+        android:id="@+id/progress_circular"
+        android:layout_height="56dp"
+        android:layout_width="56dp"
+        android:elevation="10dp"
+        android:layout_gravity="center"
+        android:layout_margin="16dp"
+        android:indeterminateDrawable="@drawable/circular_spinner"
+        android:visibility="gone"
+        app:layout_anchor="@id/drivers_listview"
+        app:layout_anchorGravity="bottom|right|end"
+        />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

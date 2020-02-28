@@ -4,4 +4,6 @@
     <dimen name="small">6dp</dimen>
     <dimen name="standard_textsize">14sp</dimen>
     <dimen name="small_textsize">11sp</dimen>
+    <dimen name="large_margin">30dp</dimen>
+    <dimen name="large_textsize">20sp</dimen>
 </resources>

@@ -9,14 +9,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.heetch.technicaltest.R
 import com.heetch.technicaltest.data.local.DriverModel
 import com.heetch.technicaltest.util.RxPicasso
-import com.squareup.picasso.Picasso
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.driver_itemview.view.*
-import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.collections.ArrayList
 
 
 private val AVATAR_BASE_URL = "http://hiring.heetch.com/"
@@ -111,7 +108,12 @@ class DriverAdapter(val context: Context)
         }
 
         override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-            return newList?.get(newItemPosition)?.equals(oldList?.get(oldItemPosition))!!
+            val oldData: DriverModel = oldList!![oldItemPosition]
+            val newData: DriverModel = newList!![newItemPosition]
+
+            return oldData.distance.equals(newData.distance) && oldData.staticMap.equals(
+                newData.staticMap
+            )
         }
 
         override fun getChangePayload(oldItemPosition: Int, newItemPosition: Int): Any? {

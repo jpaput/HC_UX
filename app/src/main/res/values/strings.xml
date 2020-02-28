@@ -3,4 +3,6 @@
     <string name="driver_away_from_you">%1$f away from you</string>
 
     <string name="maps_api_key">"AIzaSyDIJ9XX2ZvRKCJcFRrl-lRanEtFUow4piM"</string>
+    <string name="close">close</string>
+    <string name="empty_data">To see where our incredible drivers are located near you, press the "Play" button</string>
 </resources>

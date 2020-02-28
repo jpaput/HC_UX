@@ -5,8 +5,10 @@ import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.snackbar.Snackbar
 import com.heetch.technicaltest.R
 import com.heetch.technicaltest.features.adapter.DriverAdapter
 import com.heetch.technicaltest.location.LocationManager
@@ -14,15 +16,14 @@ import com.heetch.technicaltest.service.DriverService
 import com.jakewharton.rxbinding3.view.clicks
 import com.tbruyelle.rxpermissions2.RxPermissions
 import io.reactivex.Observable
-import io.reactivex.Scheduler
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_drivers.*
 import pl.charmas.android.reactivelocation2.ReactiveLocationProvider
 
-private val INTERVAL : Long = 5000
-private val NOW : Long = 0
+
+private val INTERVAL: Long = 5000
+private val NOW: Long = 0
 
 class DriversListActivity : AppCompatActivity() {
 
@@ -53,13 +54,30 @@ class DriversListActivity : AppCompatActivity() {
                     driverService.refreshDriver(it)
                         .subscribe(
                             { data ->
+                                if(data.size >0){
+                                    empty_view.visibility = View.GONE
+                                }
                                 Log.d(LOG_TAG, "Fresh data incoming !")
                                 driverAdapter.set(data)
                                 driverAdapter.notifyDataSetChanged()
                             },
-                            { error -> println("Error: $error") })
+                            { error ->
+                                Snackbar.make(
+                                    coordinator,
+                                    error.toString(),
+                                    Snackbar.LENGTH_LONG)
+                                    .setAction(getString(R.string.close), object : View.OnClickListener {
+                                        override fun onClick(view: View?) {
+
+                                        }
+                                    })
+                                    .setActionTextColor(resources.getColor(R.color.colorPrimaryDark))
+                                    .show()
+                            })
                 }
         }
+
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -93,6 +111,8 @@ class DriversListActivity : AppCompatActivity() {
         if (isRunning) {
             Log.d(LOG_TAG, "Unsuscribe GetDriver !")
 
+            progress_circular.visibility = View.GONE
+
             drivers_fab.setImageDrawable(
                 baseContext.resources.getDrawable(R.drawable.ic_play_arrow_black_24dp)
             )
@@ -101,6 +121,8 @@ class DriversListActivity : AppCompatActivity() {
 
         } else {
             Log.d(LOG_TAG, "Suscribe GetDriver !")
+
+            progress_circular.visibility = View.VISIBLE
 
             drivers_fab.setImageDrawable(
                 baseContext.resources.getDrawable(R.drawable.ic_pause_black_24dp)
