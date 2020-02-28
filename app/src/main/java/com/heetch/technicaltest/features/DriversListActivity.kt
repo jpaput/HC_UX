@@ -5,36 +5,57 @@ import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
-import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.heetch.technicaltest.R
-import com.heetch.technicaltest.data.local.DriverModel
-import com.heetch.technicaltest.data.remote.DriverRemoteModel
 import com.heetch.technicaltest.features.adapter.DriverAdapter
 import com.heetch.technicaltest.location.LocationManager
 import com.heetch.technicaltest.service.DriverService
 import com.jakewharton.rxbinding3.view.clicks
 import com.tbruyelle.rxpermissions2.RxPermissions
 import io.reactivex.Observable
+import io.reactivex.Scheduler
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_drivers.*
 import pl.charmas.android.reactivelocation2.ReactiveLocationProvider
 
 class DriversListActivity : AppCompatActivity() {
 
-    val driverService = DriverService()
-    lateinit var driverAdapter : DriverAdapter
     companion object {
         const val LOG_TAG = "DriversListActivity"
     }
+
     private val permissions =
-        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+        arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
     private val compositeDisposable = CompositeDisposable()
     private lateinit var locationManager: LocationManager
-    private lateinit var getDriverDisposable : Disposable
-    private var isGetDriverRunning: Boolean = false
+
+    private var isRunning = false
+    val driverService = DriverService()
+    lateinit var driverAdapter: DriverAdapter
+
+    lateinit var getDriverSubscription: Disposable
+    private val getDriverObservable = Observable
+        .interval(0, 5000, java.util.concurrent.TimeUnit.MILLISECONDS)
+        .timeInterval()
+        .flatMap() {
+            getUserLocation()
+                .map {
+                    driverService.refreshDriver(it)
+                        .subscribe(
+                            { data ->
+                                Log.d(LOG_TAG, "Fresh data incoming !")
+                                driverAdapter.updateData(data)
+                                driverAdapter.notifyDataSetChanged()
+                            },
+                            { error -> println("Error: $error") })
+                }
+        }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,85 +68,55 @@ class DriversListActivity : AppCompatActivity() {
         drivers_listview.adapter = driverAdapter
 
         locationManager = LocationManager(this)
-        compositeDisposable.add(subscribeToFabClick())
+        subscribeToFabClick()
     }
 
     private fun subscribeToFabClick(): Disposable {
 
         return drivers_fab.clicks()
-            .doOnNext() {
-                checkRunState()
-                .flatMap {
-                    if(it){
-                        checkPermissions()
-                            .flatMap {
-                                getUserLocation() }
-                            .doOnNext { runGetDrivers(it) }
-                    }else{
-                        Observable.just(true)
+            .flatMap {
+                checkPermissions()
+                    .flatMap {
+                        changeRunState()
                     }
-                }
             }
             .subscribe()
+
     }
 
-    private fun checkRunState() : Observable<Boolean>{
+    private fun changeRunState(): Observable<Boolean> {
 
-        Log.d(LOG_TAG, "check run state : " + isGetDriverRunning)
+        if (isRunning) {
+            Log.d(LOG_TAG, "Unsuscribe GetDriver !")
 
-        if(isGetDriverRunning){
-            Log.d(LOG_TAG, "Removing GetDriverDisposable")
-
-            compositeDisposable.remove(getDriverDisposable)
             drivers_fab.setImageDrawable(
-                baseContext.resources.getDrawable(R.drawable.ic_play_arrow_black_24dp))
-        }else{
-            drivers_fab.setImageDrawable(
-                baseContext.resources.getDrawable(R.drawable.ic_pause_black_24dp))
-        }
-
-        isGetDriverRunning = !isGetDriverRunning
-
-        return Observable.just(isGetDriverRunning)
-    }
-
-    private fun runGetDrivers(location : Location){
-
-        getDriverDisposable = Observable
-            .interval(0, 5000, java.util.concurrent.TimeUnit.MILLISECONDS)
-            .timeInterval()
-            .flatMap { driverService.refreshDriver(location) }
-            .flatMap { digestData(it, location) }
-            .subscribe (
-                { data ->
-                    driverAdapter.updateData(data)
-                    driverAdapter.notifyDataSetChanged()
-                },
-                { error -> println("Error: $error") }
+                baseContext.resources.getDrawable(R.drawable.ic_play_arrow_black_24dp)
             )
 
-        isGetDriverRunning = true
+            compositeDisposable.remove(getDriverSubscription)
 
-        Log.d(LOG_TAG, "GetDriverDisposable is now running")
+        } else {
+            Log.d(LOG_TAG, "Suscribe GetDriver !")
 
-        compositeDisposable.add(getDriverDisposable)
+            drivers_fab.setImageDrawable(
+                baseContext.resources.getDrawable(R.drawable.ic_pause_black_24dp)
+            )
+            getDriverSubscription = getDriverObservable.subscribe()
+            compositeDisposable.add(getDriverSubscription)
+        }
+
+        isRunning = !isRunning
+
+        return checkRunState()
     }
 
-    private fun digestData(it: List<DriverRemoteModel>, location: Location) : Observable<List<DriverModel>> {
-        return Observable.just(
-            it.map {
-                DriverModel(
-                    it.id,
-                    it.getFullName(),
-                    it.image,
-                    it.coordinates,
-                    locationManager.getDistance(location, it.coordinates),
-                    locationManager.generateSnapshotUrl(it.coordinates)
-                )
-            }
-            .toList().sorted()
-        )
+
+    private fun checkRunState(): Observable<Boolean> {
+
+        Log.d(LOG_TAG, "check run state : " + isRunning)
+        return Observable.just(isRunning)
     }
+
 
     override fun onDestroy() {
         compositeDisposable.dispose()
@@ -142,3 +133,5 @@ class DriversListActivity : AppCompatActivity() {
     }
 
 }
+
+

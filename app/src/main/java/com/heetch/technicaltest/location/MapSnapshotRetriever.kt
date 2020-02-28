@@ -7,6 +7,5 @@ interface MapSnapshotRetriever {
 
     fun retrieveSnapshot(latitude: Double, longitude: Double) : Observable<Bitmap>
 
-    fun generateSnapshotUrl(latitude: Double, longitude: Double): String
 
 }
