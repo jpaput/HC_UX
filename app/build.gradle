@@ -41,6 +41,9 @@ android {
             resValue "string", "app_name", "HappyTree Drivers"
         }
     }
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -85,3 +88,4 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
 }
+

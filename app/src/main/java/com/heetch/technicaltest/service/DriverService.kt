@@ -20,7 +20,7 @@ class DriverService {
             .getCoordinates(CoordinatesBody(location.latitude, location.longitude))
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .timeout(20, TimeUnit.SECONDS)
+            .timeout(5, TimeUnit.SECONDS)
             .flatMap { it -> digestData(location, it)}
 
     }
