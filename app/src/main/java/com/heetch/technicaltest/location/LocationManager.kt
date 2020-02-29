@@ -12,7 +12,7 @@ import io.reactivex.Observable
 class LocationManager(private val context: Context) : MapSnapshotRetriever, AddressRetriever {
 
     companion object {
-        const val API_KEY = "AIzaSyDWuvW9vCoiuJ_MEgaXnBrAJ67pbiyjtdA"
+        const val API_KEY = "*****"
         const val DEFAULT_ZOOM = 18
         const val ICON_URL = "https%3A%2F%2Fs3-eu-west-1.amazonaws.com%2Fheetch-production%2Fassets%2Fproducts%2Fcar-image-lepro.png"
 
